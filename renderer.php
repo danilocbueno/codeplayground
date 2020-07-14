@@ -40,37 +40,41 @@ class qtype_codeplayground_renderer extends qtype_renderer {
             question_display_options $options) {
 
         $question = $qa->get_question();
-        $currentanswer = $qa->get_last_qt_var('answer');
-        $inputname = $qa->get_qt_field_name('answer');
 
-        $inputname2 = $qa->get_qt_field_name('answer2');
-        $currentanswer2 = $qa->get_last_qt_var('answer2');
-
-        $inputname3 = $qa->get_qt_field_name('answer3');
-        $currentanswer3 = $qa->get_last_qt_var('answer3');
-
-
-        $inputattributes2 = array(
-            'type' => 'text',
-            'name' => $inputname2,
-            'value' => $currentanswer2,
-            'id' => $inputname2,
-            'size' => 80,
-            'class' => 'form-control d-inline',
+        //HTML editor
+        $currentanswerHTML = $qa->get_last_qt_var('answer');
+        $inputHTML = $qa->get_qt_field_name('answer');
+        $inputattributesHTML = array(
+            'name' => $inputHTML,
+            'value' => $currentanswerHTML,
+            'id' => 'cp_html',
+            'class'=>'language-html'
         );
 
-        $inputattributes = array(
-            'type' => 'text',
-            'name' => $inputname,
-            'value' => $currentanswer,
-            'id' => $inputname,
-            'size' => 80,
-            'class' => 'form-control d-inline',
+        //FORM CSS
+        $currentanswerCSS = $qa->get_last_qt_var('answerCSS');
+        $inputCSS = $qa->get_qt_field_name('answerCSS');
+        $inputattributesCSS = array(
+            'name' => $inputCSS,
+            'value' => $currentanswerCSS,
+            'id' => 'cp_css',
+            'class'=>'language-css'
+        );
+
+        //FORM JS
+        $currentanswerJS = $qa->get_last_qt_var('answerJS');
+        $inputJS = $qa->get_qt_field_name('answerJS');
+        $inputattributesJS = array(
+            'name' => $inputJS,
+            'value' => $currentanswerJS,
+            'id' => 'cp_js',
+            'class'=>'language-js'
         );
 
         if ($options->readonly) {
-            $inputattributes['readonly'] = 'readonly';
-            $inputattributes2['readonly'] = 'readonly';
+            $inputattributesHTML['readonly'] = 'readonly';
+            $inputattributesCSS['readonly'] = 'readonly';
+            $inputattributesJS['readonly'] = 'readonly';
         }
 
         $questiontext = $question->format_questiontext($qa);
@@ -78,42 +82,39 @@ class qtype_codeplayground_renderer extends qtype_renderer {
         if (preg_match('/_____+/', $questiontext, $matches)) {
             $placeholder = $matches[0];
         }
-        $input = html_writer::empty_tag('input', $inputattributes);
-        $input2 = html_writer::empty_tag('input', $inputattributes2);
 
         $result = html_writer::tag('div', $questiontext, array('class' => 'qtext'));
 
+        $result .= html_writer::start_div('cp_all');
+        $result .= html_writer::tag('iframe','',array('id'=>'cp_preview'));
+
 
         if ($placeholder) {
-            $questiontext = substr_replace($questiontext, $input,
-                    strpos($questiontext, $placeholder), strlen($placeholder));
+            //$questiontext = substr_replace($questiontext, $input, strpos($questiontext, $placeholder), strlen($placeholder));
         }else {
-            //form 1
-            $result .= html_writer::start_tag('div', array('class' => 'ablock form-inline'));
-            $result .= html_writer::tag('label', get_string('answer', 'qtype_shortanswer',
-                html_writer::tag('span', $input, array('class' => 'answer'))),
-                array('for' => $inputattributes['id']));
+            //formHTML
+            $result .= html_writer::start_tag('div', array('class' => 'cp_editor'));
+            $result .= html_writer::tag('textarea', s($currentanswerHTML), $inputattributesHTML);
+            $result .= html_writer::tag('textarea', s($currentanswerCSS), $inputattributesCSS);
+            $result .= html_writer::tag('textarea', s($currentanswerJS), $inputattributesJS);
             $result .= html_writer::end_tag('div');
-
-            //form2
-            $result .= html_writer::start_tag('div', array('class' => 'ablock form-inline'));
-            $result .= html_writer::tag('label', get_string('answer', 'qtype_shortanswer',
-                html_writer::tag('span', $input2, array('class' => 'answer'))),
-                array('for' => $inputattributes2['id']));
-            $result .= html_writer::end_tag('div');
-
-            //form3
-            $result .= html_writer::tag('div', html_writer::tag('textarea', s($currentanswer3),
-                array('id' => $inputname3, 'name' => $inputname3)));
 
         }
 
 
+        /*
         if ($qa->get_state() == question_state::$invalid) {
             $result .= html_writer::nonempty_tag('div',
                 $question->get_validation_error(array('answer' => $currentanswer)),
                 array('class' => 'validationerror'));
         }
+        */
+
+
+        $result .= html_writer::end_div();
+        //$this->page->requires->js('qtype_codeplayground/codeplayground/prism.js', true);
+        //$this->page->requires->css('qtype_codeplayground/css/codemirror.css', true);
+        $this->page->requires->js_call_amd('qtype_codeplayground/codeplayground', 'init');
         return $result;
     }
 

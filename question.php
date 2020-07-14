@@ -39,9 +39,8 @@ class qtype_codeplayground_question extends question_graded_automatically_with_c
 
     public function get_expected_data() {
         $resposta =array('answer' => PARAM_RAW_TRIMMED,
-            'answer2' => PARAM_RAW_TRIMMED,
-            'answer3' => PARAM_RAW_TRIMMED);
-        var_dump($resposta);
+            'answerCSS' => PARAM_RAW_TRIMMED,
+            'answerJS' => PARAM_RAW_TRIMMED);
         return $resposta;
     }
 
