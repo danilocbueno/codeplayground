@@ -19,9 +19,11 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         ], function($, CodeMirror) {
 
 
-    let htmlTextArea = document.getElementById("cp_html");
-    let cssTextArea = document.getElementById("cp_css");
-    let jsTextArea = document.getElementById("cp_js");
+    const cpAll = document.querySelector(".cp_all");
+    const htmlTextArea = document.getElementById("cp_html");
+    const cssTextArea = document.getElementById("cp_css");
+    const jsTextArea = document.getElementById("cp_js");
+    const preview = document.getElementById("cp_preview");
 
     let htmlCodeMirror = CodeMirror.fromTextArea(htmlTextArea, {
         lineNumbers: true,
@@ -43,10 +45,6 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
     });
 
 
-    const htmlField = document.getElementById("cp_html");
-    const cssField = document.getElementById("cp_css");
-    const jsField = document.getElementById("cp_js");
-    const preview = document.getElementById("cp_preview");
 
     function render() {
         let iframeComponent = preview.contentWindow.document;
@@ -61,24 +59,26 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         iframeComponent.close();
     }
 
-    function compile() {
-        document.addEventListener('keyup', function() {
+
+    // Init a timeout variable to be used below
+    let timeout = null;
+
+    // Listen for keystroke events
+    cpAll.addEventListener('keyup', function (e) {
+        // Clear the timeout if it has already been set.
+        // This will prevent the previous task from executing
+        // if it has been less than <MILLISECONDS>
+        clearTimeout(timeout);
+
+        // Make a new timeout set to go off in 1000ms (1 second)
+        timeout = setTimeout(function () {
             render();
-        });
-    };
+        }, 500);
+    });
 
     return {
         init: function() {
-
-            console.log("legal legal");
-            compile();
-            render();
-
-            // Put whatever you like here. $ is available
-            // to you as normal.
-            $(".someclass").change(function() {
-                alert("It changed!!");
-            });
+            console.log('hellow from codeplayground!');
         }
     };
 });

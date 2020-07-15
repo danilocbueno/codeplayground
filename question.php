@@ -35,7 +35,10 @@ defined('MOODLE_INTERNAL') || die();
 
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+
 class qtype_codeplayground_question extends question_graded_automatically_with_countback {
+
 
     public function get_expected_data() {
         $resposta =array('answer' => PARAM_RAW_TRIMMED,
@@ -66,11 +69,6 @@ class qtype_codeplayground_question extends question_graded_automatically_with_c
                 $prevresponse, $newresponse, 'answer');
     }
 
-    public function get_answers() {
-        var_dump($this->answers);
-        return $this->answers;
-    }
-
 
     public function get_correct_response() {
         // TODO.
@@ -91,8 +89,15 @@ class qtype_codeplayground_question extends question_graded_automatically_with_c
     }
 
     public function grade_response(array $response) {
-        // TODO.
-        $fraction = 0.5;
+        $fraction = 0;
+        if(isset($response['fraction'])) {
+            $fraction = floatval($response['fraction']);
+        }
+        $this->
+        print_object($this);
+
+        $_SESSION['cachemaldito'] = 'cachemaldito';
+
         return array($fraction, question_state::graded_state_for_fraction($fraction));
     }
 

@@ -83,9 +83,8 @@ class qtype_codeplayground_renderer extends qtype_renderer {
             $placeholder = $matches[0];
         }
 
-        $result = html_writer::tag('div', $questiontext, array('class' => 'qtext'));
-
-        $result .= html_writer::start_div('cp_all');
+        $result = html_writer::start_div('cp_all');
+        $result .= html_writer::tag('div', $questiontext, array('class' => 'qtext'));
         $result .= html_writer::tag('iframe','',array('id'=>'cp_preview'));
 
 
@@ -119,15 +118,23 @@ class qtype_codeplayground_renderer extends qtype_renderer {
     }
 
     public function specific_feedback(question_attempt $qa) {
+
+        //var_dump('Hellow from specific_feedback');
         // TODO.
         $question = $qa->get_question();
 
+        $question->grade_response(array('fraction'=>0.2));
 
-        return '';
+        $result = html_writer::tag('div', 'I am the feeedbacksss', array('class' => 'feedback'));
+
+
+        return $result;
     }
 
     public function correct_response(question_attempt $qa) {
         // TODO.
         return '';
     }
+
+
 }
