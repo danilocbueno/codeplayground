@@ -121,9 +121,6 @@ class qtype_codeplayground_renderer extends qtype_renderer {
 
         //var_dump('Hellow from specific_feedback');
         // TODO.
-        $question = $qa->get_question();
-
-        $question->grade_response(array('fraction'=>0.2));
 
         $result = html_writer::tag('div', 'I am the feeedbacksss', array('class' => 'feedback'));
 
