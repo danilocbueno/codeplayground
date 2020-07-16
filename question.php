@@ -179,10 +179,14 @@ class qtype_codeplayground_question extends question_graded_automatically {
     }
 
     private function deal_with_api_response($data) {
-        foreach($jsonRet["messages"] as $node) {
+        $messageFeedback = '';
+
+        foreach($data["messages"] as $node) {
             $messageFeedback .= '<p>' . $node["message"] . '</p>';
-            //organizando as mensagens para serem exibidas no "feedback"
+            //veja aqui: https://github.com/danilocbueno/danilocbueno.github.io/commit/bb2cd468f8a1e983d57a5a74c69e9b23e6a7e476
         }
+
+        return $messageFeedback;
     }
 
     public function grade_response(array $response) {
@@ -190,10 +194,8 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $html_code = $response['answer'];
 
         $w3c_result = $this->verify_html($html_code);
-        //$this->deal_with_api_response($w3c_result);
-
-        print_object($feedback);
-        die();
+        $feedback = $this->deal_with_api_response($w3c_result);
+        $this->save_feedback($feedback);
 
         $fraction = 0.2;
 

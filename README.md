@@ -20,3 +20,54 @@ and ensure it returns a empty result set. If not, delete those questions using t
 4. Remove the config variable that tell Moodle that this question type is installed, that is
 
 `DELETE FROM mdl_config WHERE name = 'qtype_dragdrop_version'`
+
+
+
+
+### CODE from coderuner type
+```python
+import subprocess, sys, urllib.request
+import urllib.parse
+import json
+
+__student_answer__ = """{{ STUDENT_ANSWER | e('py') }}"""
+#url = 'https://validator-nu.herokuapp.com/?out=json&lang=ptBR'
+url = 'https://validator.w3.org/nu/?out=json&lang=ptBR'
+data = __student_answer__
+
+req = urllib.request.Request(url, data.encode('utf-8'))
+req.add_header('Content-type', 'text/html; charset=UTF-8')  
+response = urllib.request.urlopen(req)
+result = response.read()
+errors = json.loads(result)
+
+feedback = ""
+contError = 0
+contWarning = 0
+contInfo = 0
+listOfErrors = ['The “border” attribute on the “table” element is obsolete. Use CSS instead.']
+
+for error in errors['messages']: 
+    eType = str(error['type'])
+    eMsg = str(error['message'])
+    eLine = error['lastLine']
+
+    if(eMsg not in listOfErrors):
+
+        listOfErrors.append(eMsg)
+
+        feedback = feedback + 'linha ' + str(eLine) + ':' + eMsg + '\\n'
+
+        if eType == 'error':
+            contError = contError + 1
+        elif eType == 'warning':
+            contWarning = contWarning + 1
+        else:
+            contInfo = contInfo + 1
+            
+totalErros = contError * 0.1
+totalWarning = contWarning * 0.05
+notaSugeridaConta = 1 - (totalErros + totalWarning)
+
+print('{"fraction": ' + str(notaSugeridaConta) + ', "got":" ' + feedback + '"}')
+```

@@ -10,8 +10,6 @@ window.requirejs.config({
 });
 */
 
-console.log('hellow from here');
-
 define(['jquery','qtype_codeplayground/lib/codemirror',
         'qtype_codeplayground/mode/javascript/javascript',
         'qtype_codeplayground/mode/css/css',
@@ -31,6 +29,8 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         readOnly: htmlTextArea.getAttribute("readonly") != null
     });
 
+    htmlCodeMirror.setSize("100%", "100%");
+
     let cssCodeMirror = CodeMirror.fromTextArea(cssTextArea, {
         lineNumbers: true,
         mode: "css",
@@ -38,11 +38,15 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         readOnly: cssTextArea.getAttribute("readonly") != null
     });
 
+    cssCodeMirror.setSize("100%", "100%");
+
     let jsCodeMirror = CodeMirror.fromTextArea(jsTextArea, {
         lineNumbers: true,
         mode: "javascript",
         readOnly: jsTextArea.getAttribute("readonly") != null
     });
+
+    jsCodeMirror.setSize("100%", "100%");
 
 
 
@@ -76,9 +80,30 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         }, 500);
     });
 
+    console.log('hellow from codeplaygorund js');
+
+    function openTab(e) {
+        e.preventDefault();
+        //remove all active classes
+        Array.from(e.target.parentNode.children).forEach(e => e.classList.remove('active'));
+        e.target.classList.add('active');
+
+        document.querySelectorAll('.cp_tab').forEach((e) => {
+            e.style.visibility = 'hidden'
+        });
+
+        document.querySelector(`#${e.target.dataset.tabid}`).style.visibility = 'visible';
+
+    }
+
+    document.querySelectorAll('.cp_tab_links button').forEach((e) => {
+        e.addEventListener('click', openTab.bind(this));
+    });
+
     return {
         init: function() {
             console.log('hellow from codeplayground!');
+            render();
         }
     };
 });

@@ -3,15 +3,10 @@
 .CodeMirror {
     /* Set height, width, borders, and global font properties here */
     font-family: monospace;
-    height: 300px;
     color: black;
     direction: ltr;
-    flex: 1;
-
-
     border: 1px solid #d3d3d3;
-    flex: 1;
-    height: 30vh;
+    border-right: none;
 }
 
 /* PADDING */
@@ -355,24 +350,68 @@ div.CodeMirror-dragcursors {
 span.CodeMirror-selectedtext { background: none; }
 
 /*****CODEMIRROR END******/
-
-
 .cp_all {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-size: 16px;
+}
+
+.cp_wrapper {
+    display: flex;
+}
+
+.cp_editor {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+}
+
+.cp_tab_links .active {
+    background-color: #ccc;
+}
+
+.cp_tab_links {
+    background-color: red;
+    overflow: hidden;
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+.cp_tab_links button {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+.cp_tabs {
+    position: relative;
+    flex-grow: 1;
+}
+
+.cp_tab {
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
 iframe#cp_preview {
     width: 100%;
-    height: 40vh;
+    height: 50vh;
     border: solid 1px #CCCCCC;
+    width:60%;
 }
 
-.cp_editor {
-    display: flex;
+.cp_tabs .cp_tab:not(:first-of-type) {
+    visibility: hidden;
 }
 
-.cp_editor textarea {
-
+.language-html, .language-css, .language-js {
+    display: none;
 }

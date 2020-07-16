@@ -83,34 +83,37 @@ class qtype_codeplayground_renderer extends qtype_renderer {
             $placeholder = $matches[0];
         }
 
-        $result = html_writer::start_div('cp_all');
-        $result .= html_writer::tag('div', $questiontext, array('class' => 'qtext'));
-        $result .= html_writer::tag('iframe','',array('id'=>'cp_preview'));
-
-
-        if ($placeholder) {
-            //$questiontext = substr_replace($questiontext, $input, strpos($questiontext, $placeholder), strlen($placeholder));
-        }else {
-            //formHTML
-            $result .= html_writer::start_tag('div', array('class' => 'cp_editor'));
-            $result .= html_writer::tag('textarea', s($currentanswerHTML), $inputattributesHTML);
-            $result .= html_writer::tag('textarea', s($currentanswerCSS), $inputattributesCSS);
-            $result .= html_writer::tag('textarea', s($currentanswerJS), $inputattributesJS);
-            $result .= html_writer::end_tag('div');
-
-        }
-
-
-        /*
-        if ($qa->get_state() == question_state::$invalid) {
-            $result .= html_writer::nonempty_tag('div',
-                $question->get_validation_error(array('answer' => $currentanswer)),
-                array('class' => 'validationerror'));
-        }
-        */
-
-
-        $result .= html_writer::end_div();
+        $readonly = $options->readonly ? "readonly='readonly'" : '';
+        $result = <<<EOF
+        <div class="cp_all">
+            <div class="qtext">$questiontext</div>
+            <div class="cp_wrapper">
+                <div class="cp_editor">
+    
+                    <div class="cp_tab_links">
+                        <button data-tabid="cp_tab_html" class="active">HTML</button>
+                        <button data-tabid="cp_tab_css">CSS</button>
+                        <button data-tabid="cp_tab_js">JS</button>
+                    </div>
+    
+                    <div class="cp_tabs">
+                        <div class="cp_tab" id="cp_tab_html">
+                            <textarea name="$inputHTML" id="cp_html" class="language-html" $readonly >$currentanswerHTML</textarea>
+                        </div>
+    
+                        <div class="cp_tab" id="cp_tab_css">
+                            <textarea name="$inputCSS" id="cp_css" class="language-css" $readonly >$currentanswerCSS</textarea>
+                        </div>
+                        <div class="cp_tab" id="cp_tab_js">
+                            <textarea name="$inputJS" id="cp_js" class="language-js" $readonly >$currentanswerJS</textarea>
+                        </div>
+                    </div>
+                </div>
+    
+                <iframe id="cp_preview"></iframe>
+            </div>
+        </div>
+EOF;
         //$this->page->requires->js('qtype_codeplayground/codeplayground/prism.js', true);
         //$this->page->requires->css('qtype_codeplayground/css/codemirror.css', true);
         $this->page->requires->js_call_amd('qtype_codeplayground/codeplayground', 'init');
@@ -118,14 +121,20 @@ class qtype_codeplayground_renderer extends qtype_renderer {
     }
 
     public function specific_feedback(question_attempt $qa) {
+        global $DB, $CFG;
 
-        //var_dump('Hellow from specific_feedback');
-        // TODO.
+        // get feedback from the database
+        $record = $DB->get_record ( 'qtype_codeplay_feedback', array (
+            'questionattemptid' => $qa->get_database_id ()
+        ), 'feedback' );
 
-        $result = html_writer::tag('div', 'I am the feeedbacksss', array('class' => 'feedback'));
+        if ( $record === false ) {
+            $feedback = '';
+        } else {
+            $feedback = $record->feedback;
+        }
 
-
-        return $result;
+        return html_writer::tag('div', $feedback, array('class' => 'feedback'));
     }
 
     public function correct_response(question_attempt $qa) {
