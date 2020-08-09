@@ -117,9 +117,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
     private function verify_html($html_code) {
         $data = array("code" => $html_code);
 
-        print_object($html_code);
-
-        $config['url'] = 'https://validator.w3.org/nu/?out=json&lang=ptBR';
+        $config['url'] = 'https://validator.w3.org/nu/?out=json&lang=pt-BR';
         $config['useragent'] = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:17.0) Gecko/20100101 Firefox/17.0';
 
         $ch = curl_init ();
@@ -156,7 +154,6 @@ class qtype_codeplayground_question extends question_graded_automatically {
                 'message' => 'JSON decoding error'
             );
         }
-
         return $json;
     }
 
@@ -179,40 +176,110 @@ class qtype_codeplayground_question extends question_graded_automatically {
     }
 
     private function deal_with_api_response($data) {
-        $messageFeedback = '';
+        $messageFeedback = '<h3>HTML</h3>';
+        $totalErrors = 0;
 
-        foreach($data["messages"] as $node) {
-            $messageFeedback .= '<p>' . $node["message"] . '</p>';
-            //veja aqui: https://github.com/danilocbueno/danilocbueno.github.io/commit/bb2cd468f8a1e983d57a5a74c69e9b23e6a7e476
+        if(empty($data["messages"])) {
+            $messageFeedback = "Parabéns, não encontramos erros no seu documento HTML";
+        } else {
+            $totalErrors = sizeof($data["messages"]);
+            foreach($data["messages"] as $node) {
+                $messageFeedback .= '<p>' . $node["message"] . '</p>';
+                //veja aqui: https://github.com/danilocbueno/danilocbueno.github.io/commit/bb2cd468f8a1e983d57a5a74c69e9b23e6a7e476
+            }
         }
 
-        return $messageFeedback;
+        return array("errors"=> $totalErrors, "feedback" => $messageFeedback);
+    }
+
+
+    private function verify_css($css_code) {
+        $config['useragent'] = 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:17.0) Gecko/20100101 Firefox/17.0';
+        $endpoint = 'https://jigsaw.w3.org/css-validator/validator';
+        $params = array("text" => $css_code, "output" => "json");
+        $url = $endpoint . '?' . http_build_query($params);
+
+        $ch = curl_init ();
+        curl_setopt( $ch, CURLOPT_URL, $url);
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type: text/html; charset=utf-8'));
+        curl_setopt( $ch, CURLOPT_VERBOSE, 0 );
+        curl_setopt( $ch, CURLOPT_USERAGENT, $config['useragent']);
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 1 );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt( $ch, CURLOPT_AUTOREFERER, 1 );
+        curl_setopt( $ch, CURLOPT_MAXREDIRS, 10 );
+        curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 5 );
+        $result = curl_exec ( $ch );
+
+
+        $HTTPStatusCode = curl_getinfo ( $ch, CURLINFO_HTTP_CODE );
+        curl_close ( $ch );
+
+        if ( $HTTPStatusCode != 200 ) {
+
+            return array (
+                'error' => true,
+                'errortype' => 'REMOTE_SERVER_ERROR',
+                'message' => $result
+            );
+        }
+
+        $json = json_decode ( $result, true );
+        if ( $json === null ) {
+            return array (
+                'error' => true,
+                'errortype' => 'REMOTE_SERVER_ERROR',
+                'message' => 'JSON decoding error'
+            );
+        }
+
+        return $json;
+    }
+
+    private function deal_with_css_results($json_CSS) {
+        $cssResults = $json_CSS['cssvalidation'];
+        $messageFeedback = '<h3>CSS</h3>';
+        $totalErrors = 0;
+
+        if(!isset($cssResults["errors"]) ){
+            $messageFeedback .= '<p>Parabéns! Nenhum erro encontrado em seu CSS!</p>';
+        } else {
+            $totalErrors = sizeof($cssResults["errors"]);
+            foreach($cssResults["errors"] as $error) {
+                $messageFeedback .= '<p>' . $error["message"] . '</p>';
+            }
+        }
+
+        return array("errors"=> $totalErrors, "feedback" => $messageFeedback);
     }
 
     public function grade_response(array $response) {
 
         $html_code = $response['answer'];
+        $css_code = $response['answerCSS'];
 
-        $w3c_result = $this->verify_html($html_code);
-        $feedback = $this->deal_with_api_response($w3c_result);
+        $html_results = $this->verify_html($html_code);
+        $html_results = $this->deal_with_api_response($html_results);
+
+        $css_results = $this->verify_css($css_code);
+        $css_results = $this->deal_with_css_results($css_results);
+
+        print_object($html_results);
+        print_object($css_results);
+
+
+        $fraction = ($html_results["errors"] + $css_results["errors"])/100;
+        //$fraction = 0.2;
+        $total_score = 1 - $fraction;
+
+        print_object($total_score);
+        //die();
+
+        $feedback = $html_results["feedback"] . $css_results["feedback"] . "<p>Total de infrações: " . $fraction*100 . "</p>";
+
         $this->save_feedback($feedback);
 
-        $fraction = 0.2;
-
-        return array (
-            $fraction,
-            question_state::graded_state_for_fraction ( $fraction )
-        );
-
-
-        $fraction = 0;
-        if(isset($response['fraction'])) {
-            $fraction = floatval($response['fraction']);
-        }
-
-
-
-        return array($fraction, question_state::graded_state_for_fraction($fraction));
+        return array($total_score, question_state::graded_state_for_fraction($total_score));
     }
 
     public function compute_final_grade($responses, $totaltries) {
