@@ -5,8 +5,6 @@
     font-family: monospace;
     color: black;
     direction: ltr;
-    border: 1px solid #d3d3d3;
-    border-right: none;
 }
 
 /* PADDING */
@@ -26,7 +24,6 @@
 /* GUTTER */
 
 .CodeMirror-gutters {
-    border-right: 1px solid #ddd;
     background-color: #f7f7f7;
     white-space: nowrap;
 }
@@ -358,36 +355,46 @@ span.CodeMirror-selectedtext { background: none; }
 }
 
 .cp_wrapper {
-    display: flex;
+
 }
 
 .cp_editor {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 40%;
-}
-
-.cp_tab_links .active {
-    background-color: #ccc;
+    height: 35vh;
+    border-top-right-radius: 6px;
+    border-top-left-radius: 6px;
+    box-shadow: 0 .1em 1em 0 rgba(0,0,0,.2);
 }
 
 .cp_tab_links {
-    background-color: red;
     overflow: hidden;
-    border-top: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    background-color: #f1f1f1;
+    background-color: #f7f7f7;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    padding-left: 29px;
 }
 
-.cp_tab_links button {
-    background-color: inherit;
+.cp_tab_links .cp_tab_btn {
     border: none;
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
-    font-size: 17px;
+    font-size: 14px;
+    flex-grow: 1;
+    border-right: solid 1px #ddd;
+    background: #f7f7f7;
+}
+
+.cp_tab_links .active {
+    background-color: white;
+}
+
+.cp_tab_links .cp_tab_btn_no-border{
+    border-right: none;
 }
 
 .cp_tabs {
@@ -403,9 +410,9 @@ span.CodeMirror-selectedtext { background: none; }
 
 iframe#cp_preview {
     width: 100%;
-    height: 50vh;
-    border: solid 1px #CCCCCC;
-    width:60%;
+    height: 40vh;
+    border:none;
+    background: white;
 }
 
 .cp_tabs .cp_tab:not(:first-of-type) {
@@ -414,4 +421,40 @@ iframe#cp_preview {
 
 .language-html, .language-css, .language-js {
     display: none;
+}
+
+
+.browser-mockup {
+    border-top: 2em solid rgba(230, 230, 230, 0.7);
+    box-shadow: 0 .1em 1em 0 rgba(0,0,0,.2);
+    position: relative;
+    border-radius: 6px 6px 0 0;
+    background: #f2f2f2;
+    margin-top: 1em;
+}
+
+/*browser mockup*/
+.browser-mockup:before {
+    display: block;
+    position: absolute;
+    content: '';
+    top: -1.25em;
+    left: 1em;
+    width: 0.5em;
+    height: 0.5em;
+    border-radius: 50%;
+    background-color: #FE655E;
+    box-shadow: 0 0 0 2px #FF605C, 1.5em 0 0 2px #FFBD44, 3em 0 0 2px #00CA4E;
+}
+
+.browser-mockup:after {
+    display: block;
+    position: absolute;
+    content: '';
+    top: -1.6em;
+    left: 5.5em;
+    width: calc(100% - 6em);
+    height: 1.2em;
+    border-radius: 6px;
+    background-color: white;
 }

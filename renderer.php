@@ -91,9 +91,9 @@ class qtype_codeplayground_renderer extends qtype_renderer {
                 <div class="cp_editor">
     
                     <div class="cp_tab_links">
-                        <button data-tabid="cp_tab_html" class="active">HTML</button>
-                        <button data-tabid="cp_tab_css">CSS</button>
-                        <button data-tabid="cp_tab_js">JS</button>
+                        <button data-tabid="cp_tab_html" class="cp_tab_btn active">HTML</button>
+                        <button data-tabid="cp_tab_css" class="cp_tab_btn" >CSS</button>
+                        <button class="cp_tab_btn cp_tab_btn_no-border" data-tabid="cp_tab_js">JavaScript</button>
                     </div>
     
                     <div class="cp_tabs">
@@ -110,7 +110,10 @@ class qtype_codeplayground_renderer extends qtype_renderer {
                     </div>
                 </div>
     
-                <iframe id="cp_preview"></iframe>
+                <div class="browser-mockup">
+                    <iframe id="cp_preview"></iframe>
+                </div>
+                
             </div>
         </div>
 EOF;
