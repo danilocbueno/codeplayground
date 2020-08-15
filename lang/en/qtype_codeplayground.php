@@ -23,14 +23,15 @@
 
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['pluginname'] = 'codeplayground';
+$string['pluginname'] = 'Code Playground';
 $string['pluginname_help'] = 'Create a cloze question type with embedded response fields in the question text to enter a numeric
 or text value or select a value from a number of options.';
 $string['pluginname_link'] = 'question/type/codeplayground';
 $string['pluginnameadding'] = 'Adding a codeplayground question';
 $string['pluginnameediting'] = 'Editing a codeplayground question';
-$string['pluginnamesummary'] = 'A codeplayground question type which allows the embedding of the response fields for various available
-sub questions in the question text.
+$string['pluginnamesummary'] = 'The Code Playground question type allows real-time editing and viewing of HTML, CSS and JavaScript codes. So the student can insert his code and see the result immediately in the browser.
 
-So the student can enter a numeric or short text answer or choose an answer or answer(s) from
- using a select box, check boxes or radio boxes.';
+In addition to real-time visualization, Code Playground checks the code submitted by students through the W3C API for HTML and CSS.';
+
+$string['total_failures'] = "Total failures";
+$string['document_ok'] = 'Document checking completed. No errors or warnings to show.';

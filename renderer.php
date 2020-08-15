@@ -117,8 +117,6 @@ class qtype_codeplayground_renderer extends qtype_renderer {
             </div>
         </div>
 EOF;
-        //$this->page->requires->js('qtype_codeplayground/codeplayground/prism.js', true);
-        //$this->page->requires->css('qtype_codeplayground/css/codemirror.css', true);
         $this->page->requires->js_call_amd('qtype_codeplayground/codeplayground', 'init');
         return $result;
     }

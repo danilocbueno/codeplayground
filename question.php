@@ -180,7 +180,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $totalErrors = 0;
 
         if(empty($data["messages"])) {
-            $messageFeedback = "Parabéns, não encontramos erros no seu documento HTML";
+            $messageFeedback = get_string('document_ok');
         } else {
             $totalErrors = sizeof($data["messages"]);
             foreach($data["messages"] as $node) {
@@ -242,7 +242,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $totalErrors = 0;
 
         if(!isset($cssResults["errors"]) ){
-            $messageFeedback .= '<p>Parabéns! Nenhum erro encontrado em seu CSS!</p>';
+            $messageFeedback .= get_string('document_ok');
         } else {
             $totalErrors = sizeof($cssResults["errors"]);
             foreach($cssResults["errors"] as $error) {
@@ -255,30 +255,33 @@ class qtype_codeplayground_question extends question_graded_automatically {
 
     public function grade_response(array $response) {
 
+        //check if exist answer
+        if(empty($response) || empty(trim($response['answer']))) {
+            $this->save_feedback('Vazio');
+            return array(0, question_state::graded_state_for_fraction(0));
+        }
+
         $html_code = $response['answer'];
         $css_code = $response['answerCSS'];
+        $js_code = $response['answerJS'];
 
         $html_results = $this->verify_html($html_code);
         $html_results = $this->deal_with_api_response($html_results);
 
-        $css_results = $this->verify_css($css_code);
-        $css_results = $this->deal_with_css_results($css_results);
-
-        print_object($html_results);
-        print_object($css_results);
-
+        if(!empty($response['answerCSS'])) {
+            $css_results = $this->verify_css($css_code);
+            $css_results = $this->deal_with_css_results($css_results);
+        } else {
+            $css_results["errors"] = 0;
+            $css_results["feedback"] = '';
+        }
 
         $fraction = ($html_results["errors"] + $css_results["errors"])/100;
-        //$fraction = 0.2;
         $total_score = 1 - $fraction;
 
-        print_object($total_score);
-        //die();
-
-        $feedback = $html_results["feedback"] . $css_results["feedback"] . "<p>Total de infrações: " . $fraction*100 . "</p>";
+        $feedback = $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('total_failures') . $fraction*100 .  '</p>';
 
         $this->save_feedback($feedback);
-
         return array($total_score, question_state::graded_state_for_fraction($total_score));
     }
 
