@@ -175,12 +175,12 @@ class qtype_codeplayground_question extends question_graded_automatically {
         }
     }
 
-    private function deal_with_api_response($data) {
+    private function handle_html($data) {
         $messageFeedback = '<h3>HTML</h3>';
         $totalErrors = 0;
 
         if(empty($data["messages"])) {
-            $messageFeedback = get_string('document_ok');
+            $messageFeedback .= get_string('cp_document_ok', 'qtype_codeplayground');
         } else {
             $totalErrors = sizeof($data["messages"]);
             foreach($data["messages"] as $node) {
@@ -236,13 +236,13 @@ class qtype_codeplayground_question extends question_graded_automatically {
         return $json;
     }
 
-    private function deal_with_css_results($json_CSS) {
+    private function handle_css($json_CSS) {
         $cssResults = $json_CSS['cssvalidation'];
         $messageFeedback = '<h3>CSS</h3>';
         $totalErrors = 0;
 
         if(!isset($cssResults["errors"]) ){
-            $messageFeedback .= get_string('document_ok');
+            $messageFeedback .= get_string('cp_document_ok', 'qtype_codeplayground');
         } else {
             $totalErrors = sizeof($cssResults["errors"]);
             foreach($cssResults["errors"] as $error) {
@@ -257,7 +257,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
 
         //check if exist answer
         if(empty($response) || empty(trim($response['answer']))) {
-            $this->save_feedback('Vazio');
+            $this->save_feedback(get_string('cp_answer_empty', 'qtype_codeplayground'));
             return array(0, question_state::graded_state_for_fraction(0));
         }
 
@@ -266,11 +266,11 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $js_code = $response['answerJS'];
 
         $html_results = $this->verify_html($html_code);
-        $html_results = $this->deal_with_api_response($html_results);
+        $html_results = $this->handle_html($html_results);
 
         if(!empty($response['answerCSS'])) {
             $css_results = $this->verify_css($css_code);
-            $css_results = $this->deal_with_css_results($css_results);
+            $css_results = $this->handle_css($css_results);
         } else {
             $css_results["errors"] = 0;
             $css_results["feedback"] = '';
@@ -279,7 +279,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $fraction = ($html_results["errors"] + $css_results["errors"])/100;
         $total_score = 1 - $fraction;
 
-        $feedback = $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('total_failures') . $fraction*100 .  '</p>';
+        $feedback = $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
 
         $this->save_feedback($feedback);
         return array($total_score, question_state::graded_state_for_fraction($total_score));

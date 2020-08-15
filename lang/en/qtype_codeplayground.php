@@ -33,5 +33,6 @@ $string['pluginnamesummary'] = 'The Code Playground question type allows real-ti
 
 In addition to real-time visualization, Code Playground checks the code submitted by students through the W3C API for HTML and CSS.';
 
-$string['total_failures'] = "Total failures";
-$string['document_ok'] = 'Document checking completed. No errors or warnings to show.';
+$string['cp_total_failures'] = "Total failures: ";
+$string['cp_document_ok'] = 'Document checking completed. No errors or warnings to show.';
+$string['cp_answer_empty'] = 'Answer is empty.';

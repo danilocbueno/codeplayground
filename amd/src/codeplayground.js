@@ -80,8 +80,6 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
         }, 500);
     });
 
-    console.log('hellow from codeplaygorund js');
-
     function openTab(e) {
         e.preventDefault();
         //remove all active classes
@@ -102,7 +100,6 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
 
     return {
         init: function() {
-            console.log('hellow from codeplayground!');
             render();
         }
     };
