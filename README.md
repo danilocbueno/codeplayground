@@ -5,3 +5,10 @@ The Code Playground question type allows real-time editing and viewing of HTML, 
 In addition to real-time visualization, Code Playground checks the code submitted by students through the W3C API for HTML and CSS.
 
 From the results of the API's, the plugin calculates the score of the question by making a simple calculation removing 1% for each failure committed.
+
+
+## How to install
+
+Copy the folder into `moodle/question/type`
+
+You have to bundle the dependicies, for that, install grunt globaly with `npm install -g grunt-cli` and then run grunt from the amd directory plugin.

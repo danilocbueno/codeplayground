@@ -10,71 +10,91 @@ window.requirejs.config({
 });
 */
 
-define(['jquery','qtype_codeplayground/lib/codemirror',
-        'qtype_codeplayground/mode/javascript/javascript',
-        'qtype_codeplayground/mode/css/css',
-        'qtype_codeplayground/mode/htmlmixed/htmlmixed'
-        ], function($, CodeMirror) {
+define(['jquery', 'qtype_codeplayground/lib/codemirror',
+    'qtype_codeplayground/mode/javascript/javascript',
+    'qtype_codeplayground/mode/css/css',
+    'qtype_codeplayground/mode/htmlmixed/htmlmixed'
+], function ($, CodeMirror) {
 
+    var codeMirros = [];
 
+    document.querySelectorAll(".cp_all textarea").forEach((e) => {
+        const modeName = e.getAttribute("data-mode");
+        let codeMirror = CodeMirror.fromTextArea(e, {
+            lineNumbers: true,
+            styleActiveLine: true,
+            mode: modeName,
+            readOnly: e.getAttribute("readonly") != null,
+            lineWrapping: true,
+        });
+
+        codeMirror.setSize("100%", "100%");
+        codeMirros.push({ [modeName]: codeMirror });
+    });
+
+    codeMirros = Object.assign(...codeMirros);
+
+    window.codes = codeMirros;
+
+    //elements
     const cpAll = document.querySelector(".cp_all");
-    const htmlTextArea = document.getElementById("cp_html");
-    const cssTextArea = document.getElementById("cp_css");
-    const jsTextArea = document.getElementById("cp_js");
     const preview = document.getElementById("cp_preview");
 
-    let htmlCodeMirror = CodeMirror.fromTextArea(htmlTextArea, {
-        lineNumbers: true,
-        mode: "htmlmixed",
-        readOnly: htmlTextArea.getAttribute("readonly") != null
-    });
+    function toggleTheme() {
+        document.querySelector(".cp_all").classList.toggle("dark");
 
-    htmlCodeMirror.setSize("100%", "100%");
+        const theme = codeMirros.htmlmixed?.getOption("theme");
+        let toogle = theme == "default" ? "dracula" : "default";
 
-    let cssCodeMirror = CodeMirror.fromTextArea(cssTextArea, {
-        lineNumbers: true,
-        mode: "css",
-        value: cssTextArea.value,
-        readOnly: cssTextArea.getAttribute("readonly") != null
-    });
-
-    cssCodeMirror.setSize("100%", "100%");
-
-    let jsCodeMirror = CodeMirror.fromTextArea(jsTextArea, {
-        lineNumbers: true,
-        mode: "javascript",
-        readOnly: jsTextArea.getAttribute("readonly") != null
-    });
-
-    jsCodeMirror.setSize("100%", "100%");
-
-
-
-    function render() {
-        let iframeComponent = preview.contentWindow.document;
-
-        iframeComponent.open();
-
-        iframeComponent.writeln(`
-            ${htmlCodeMirror.getValue()}
-            <style>${cssCodeMirror.getValue()}</style>
-            <script>${jsCodeMirror.getValue()}</script>`);
-
-        iframeComponent.close();
+        for (const property in codeMirros) {
+            codeMirros[property].setOption("theme", toogle);
+        }
     }
 
+    //IFRAME Visualizar
+    function toggleWrap() {
+        const lineWrapping = codeMirros.htmlmixed?.getOption("lineWrapping");
+        for (const property in codeMirros) {
+            codeMirros[property].setOption("lineWrapping", !lineWrapping);
+        }
+    }
 
-    // Init a timeout variable to be used below
-    let timeout = null;
+    function render() {
+        //disable submit
+        const btnSubmit = document.querySelector("#mod_quiz-next-nav");
+        if(btnSubmit){ 
+            btnSubmit.setAttribute('disabled', 'disabled');
+        }
+        
+        //loading preview
+        const cp_preview_loading = document.querySelectorAll(".cp_preview_loading");
+        cp_preview_loading.forEach(e => e.classList.add('show'))
+
+        let cssCode = codeMirros.css.getValue() ?? '';
+        let jsCode = codeMirros.javascript.getValue() ?? '';
+
+        let iframeComponent = preview.contentWindow.document;
+        iframeComponent.open();
+        iframeComponent.writeln(`
+                      ${codeMirros.htmlmixed.getValue()}
+                      <style>${cssCode}</style>
+                      <script>${jsCode}</script>`);
+
+        iframeComponent.close();
+        cp_preview_loading.forEach(e => e.classList.remove('show'))
+
+        runTests();
+    }
+
+    function runTests() {
+        document.querySelector("#mocha").innerHTML = "";
+        mocha.run();
+    }
 
     // Listen for keystroke events
-    cpAll.addEventListener('keyup', function (e) {
-        // Clear the timeout if it has already been set.
-        // This will prevent the previous task from executing
-        // if it has been less than <MILLISECONDS>
+    let timeout = null;
+    cpAll.addEventListener("keyup", function (e) {
         clearTimeout(timeout);
-
-        // Make a new timeout set to go off in 1000ms (1 second)
         timeout = setTimeout(function () {
             render();
         }, 500);
@@ -83,23 +103,36 @@ define(['jquery','qtype_codeplayground/lib/codemirror',
     function openTab(e) {
         e.preventDefault();
         //remove all active classes
-        Array.from(e.target.parentNode.children).forEach(e => e.classList.remove('active'));
-        e.target.classList.add('active');
+        Array.from(e.target.parentNode.children).forEach((e) =>
+            e.classList.remove("active")
+        );
+        e.target.classList.add("active");
 
-        document.querySelectorAll('.cp_tab').forEach((e) => {
-            e.style.visibility = 'hidden'
+        e.target.parentNode.parentNode.querySelectorAll(".cp_tab").forEach((e) => {
+            e.style.visibility = "hidden";
         });
 
-        document.querySelector(`#${e.target.dataset.tabid}`).style.visibility = 'visible';
-
+        document.querySelector(`#${e.target.dataset.tabid}`).style.visibility =
+            "visible";
     }
 
-    document.querySelectorAll('.cp_tab_links button').forEach((e) => {
-        e.addEventListener('click', openTab.bind(this));
+    //event listeners
+    document
+        .querySelector(".cp_tab_toggle_theme")
+        .addEventListener("click", toggleTheme);
+
+    document
+        .querySelector(".cp_tab_toggle_wrap")
+        .addEventListener("click", toggleWrap);
+
+    document.querySelectorAll(".cp_tab_links .cp_tab_btn").forEach((e) => {
+        //console.log(e);
+        e.addEventListener("click", openTab.bind(this));
     });
 
+
     return {
-        init: function() {
+        init: function () {
             render();
         }
     };

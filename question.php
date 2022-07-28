@@ -43,7 +43,8 @@ class qtype_codeplayground_question extends question_graded_automatically {
     public function get_expected_data() {
         $resposta =array('answer' => PARAM_RAW_TRIMMED,
             'answerCSS' => PARAM_RAW_TRIMMED,
-            'answerJS' => PARAM_RAW_TRIMMED);
+            'answerJS' => PARAM_RAW_TRIMMED,
+            'answerTestResult' => PARAM_RAW_TRIMMED);
         return $resposta;
     }
 
@@ -264,6 +265,8 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $html_code = $response['answer'];
         $css_code = $response['answerCSS'];
         $js_code = $response['answerJS'];
+        $answerTestResult = $response['answerTestResult'];
+        print_r($answerTestResult);
 
         $html_results = $this->verify_html($html_code);
         $html_results = $this->handle_html($html_results);
@@ -279,7 +282,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $fraction = ($html_results["errors"] + $css_results["errors"])/100;
         $total_score = 1 - $fraction;
 
-        $feedback = $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
+        $feedback = $answerTestResult . $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
 
         $this->save_feedback($feedback);
         return array($total_score, question_state::graded_state_for_fraction($total_score));
