@@ -12,3 +12,13 @@ From the results of the API's, the plugin calculates the score of the question b
 Copy the folder into `moodle/question/type`
 
 You have to bundle the dependicies, for that, install grunt globaly with `npm install -g grunt-cli` and then run grunt from the amd directory plugin.
+
+## Useful links
+https://docs.moodle.org/dev/Javascript_Modules
+https://moodledev.io/docs
+https://dev.to/imiahazel/pure-html-css-tabs-2p60
+https://yoksel.github.io/url-encoder/
+
+
+## Load modules
+The new module load JS work but load the js several times...

@@ -177,7 +177,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
     }
 
     private function handle_html($data) {
-        $messageFeedback = '<h3>HTML</h3>';
+        $messageFeedback = '<h5>Sintaxe HTML</h5>';
         $totalErrors = 0;
 
         if(empty($data["messages"])) {
@@ -239,7 +239,7 @@ class qtype_codeplayground_question extends question_graded_automatically {
 
     private function handle_css($json_CSS) {
         $cssResults = $json_CSS['cssvalidation'];
-        $messageFeedback = '<h3>CSS</h3>';
+        $messageFeedback = '<h5>Sintaxe CSS</h5>';
         $totalErrors = 0;
 
         if(!isset($cssResults["errors"]) ){
@@ -266,7 +266,6 @@ class qtype_codeplayground_question extends question_graded_automatically {
         $css_code = $response['answerCSS'];
         $js_code = $response['answerJS'];
         $answerTestResult = $response['answerTestResult'];
-        print_r($answerTestResult);
 
         $html_results = $this->verify_html($html_code);
         $html_results = $this->handle_html($html_results);
@@ -279,13 +278,52 @@ class qtype_codeplayground_question extends question_graded_automatically {
             $css_results["feedback"] = '';
         }
 
-        $fraction = ($html_results["errors"] + $css_results["errors"])/100;
-        $total_score = 1 - $fraction;
+        //sintax fraction (2% per fail)
+        $syntax_score = ($html_results["errors"] + $css_results["errors"]) * 0.02;
 
-        $feedback = $answerTestResult . $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
+        //tests
+        $test_html_results = "";
+        $test_score = "não tem testes";
+        $total_score = 1;
+        if(!empty($answerTestResult)) {
+            $test_results = json_decode($answerTestResult, true);
+            $test_html_results = $this->handle_tests($test_results);
+            $test_score = $test_results['score'];
+            if($total_score > 0 && $total_score < 1) {
+                $total_score = $total_score - $test_score;
+            }else {
+                $total_score  = $test_score;
+            }
+        }
+
+        $total_score = $total_score -  $syntax_score;
+        $score = "<h6>Test score: $test_score, Syntax score: $syntax_score</h6>";
+        
+
+
+        $feedback = $score. $test_html_results . $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
 
         $this->save_feedback($feedback);
         return array($total_score, question_state::graded_state_for_fraction($total_score));
+    }
+
+    public function handle_tests($results) {
+        $html = '<h3>Resultado dos testes</h3>';
+        $html .= "<h5>Testes com falha</h5>";
+
+        foreach($results['fail'] as $fail) {
+            $html .= "<p>$fail</p>";
+        }
+
+        $html .= "<h5>Testes com sucesso</h5>";
+        foreach($results['passes'] as $pass) {
+            $html .= "<p>$pass</p>";
+        }
+
+        $html .= "<p>Pontuação dos testes: <strong>" . $results['score'] . "</strong></p>";
+        $html .= "<p>Total de testes: <strong>" . $results['total'] . "</strong></p>";
+
+        return $html;
     }
 
     public function compute_final_grade($responses, $totaltries) {

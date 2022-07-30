@@ -1,140 +1,161 @@
-// Put this file in path/to/plugin/amd/src
-// You can call it anything you like
-/*
-window.requirejs.config({
-    packages: [{
-        name: "codemirror",
-        location: "qtype_codeplayground",
-        main: "lib/codemirror"
-    }]
-});
-*/
+import CodeMirror from "qtype_codeplayground/lib/codemirror";
+import "qtype_codeplayground/mode/javascript/javascript";
+import "qtype_codeplayground/mode/css/css";
+import "qtype_codeplayground/mode/htmlmixed/htmlmixed";
 
-define(['jquery', 'qtype_codeplayground/lib/codemirror',
-    'qtype_codeplayground/mode/javascript/javascript',
-    'qtype_codeplayground/mode/css/css',
-    'qtype_codeplayground/mode/htmlmixed/htmlmixed'
-], function ($, CodeMirror) {
+let editors = [];
+let timer; //deal with keypress
 
-    var codeMirros = [];
+document.querySelectorAll(".cp_all").forEach((e, index) => {
+  let codeMirrors = [];
+  const iframePreview = e.querySelector(".browser-mockup");
+  const cmName = "cm" + index;
 
-    document.querySelectorAll(".cp_all textarea").forEach((e) => {
-        const modeName = e.getAttribute("data-mode");
-        let codeMirror = CodeMirror.fromTextArea(e, {
-            lineNumbers: true,
-            styleActiveLine: true,
-            mode: modeName,
-            readOnly: e.getAttribute("readonly") != null,
-            lineWrapping: true,
-        });
-
-        codeMirror.setSize("100%", "100%");
-        codeMirros.push({ [modeName]: codeMirror });
+  e.querySelectorAll("textarea").forEach((e) => {
+    const modeName = e.getAttribute("data-mode");
+    let cm = CodeMirror.fromTextArea(e, {
+      lineNumbers: true,
+      styleActiveLine: true,
+      mode: modeName,
+      readOnly: e.getAttribute("readonly") != null,
+      lineWrapping: true,
     });
 
-    codeMirros = Object.assign(...codeMirros);
-
-    window.codes = codeMirros;
-
-    //elements
-    const cpAll = document.querySelector(".cp_all");
-    const preview = document.getElementById("cp_preview");
-
-    function toggleTheme() {
-        document.querySelector(".cp_all").classList.toggle("dark");
-
-        const theme = codeMirros.htmlmixed?.getOption("theme");
-        let toogle = theme == "default" ? "dracula" : "default";
-
-        for (const property in codeMirros) {
-            codeMirros[property].setOption("theme", toogle);
-        }
-    }
-
-    //IFRAME Visualizar
-    function toggleWrap() {
-        const lineWrapping = codeMirros.htmlmixed?.getOption("lineWrapping");
-        for (const property in codeMirros) {
-            codeMirros[property].setOption("lineWrapping", !lineWrapping);
-        }
-    }
-
-    function render() {
-        //disable submit
-        const btnSubmit = document.querySelector("#mod_quiz-next-nav");
-        if(btnSubmit){ 
-            btnSubmit.setAttribute('disabled', 'disabled');
-        }
-        
-        //loading preview
-        const cp_preview_loading = document.querySelectorAll(".cp_preview_loading");
-        cp_preview_loading.forEach(e => e.classList.add('show'))
-
-        let cssCode = codeMirros.css.getValue() ?? '';
-        let jsCode = codeMirros.javascript.getValue() ?? '';
-
-        let iframeComponent = preview.contentWindow.document;
-        iframeComponent.open();
-        iframeComponent.writeln(`
-                      ${codeMirros.htmlmixed.getValue()}
-                      <style>${cssCode}</style>
-                      <script>${jsCode}</script>`);
-
-        iframeComponent.close();
-        cp_preview_loading.forEach(e => e.classList.remove('show'))
-
-        runTests();
-    }
-
-    function runTests() {
-        document.querySelector("#mocha").innerHTML = "";
-        mocha.run();
-    }
-
-    // Listen for keystroke events
-    let timeout = null;
-    cpAll.addEventListener("keyup", function (e) {
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-            render();
-        }, 500);
+    cm.on("changes", (e) => {
+      window.clearTimeout(timer);
+      //console.log("typing...");
     });
 
-    function openTab(e) {
-        e.preventDefault();
-        //remove all active classes
-        Array.from(e.target.parentNode.children).forEach((e) =>
-            e.classList.remove("active")
-        );
-        e.target.classList.add("active");
-
-        e.target.parentNode.parentNode.querySelectorAll(".cp_tab").forEach((e) => {
-            e.style.visibility = "hidden";
-        });
-
-        document.querySelector(`#${e.target.dataset.tabid}`).style.visibility =
-            "visible";
-    }
-
-    //event listeners
-    document
-        .querySelector(".cp_tab_toggle_theme")
-        .addEventListener("click", toggleTheme);
-
-    document
-        .querySelector(".cp_tab_toggle_wrap")
-        .addEventListener("click", toggleWrap);
-
-    document.querySelectorAll(".cp_tab_links .cp_tab_btn").forEach((e) => {
-        //console.log(e);
-        e.addEventListener("click", openTab.bind(this));
+    cm.on("changes", (e) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        render(cmName);
+      }, 1000);
     });
 
+    cm.setSize("100%", "100%");
 
-    return {
-        init: function () {
-            render();
-        }
-    };
+    codeMirrors.push({ [modeName]: cm });
+  });
+
+  editors.push({
+    [cmName]: {
+      cms: Object.assign(...codeMirrors),
+      preview: iframePreview,
+    },
+  });
 });
 
+editors = Object.assign(...editors);
+console.log(editors);
+
+function toggleTheme() {
+  //TODO FIX the theme change using localstorage
+  document.querySelectorAll(".cp_all").forEach((e) => {
+    e.classList.toggle("dark");
+  });
+
+  document.querySelectorAll(".cp_tab_toggle_theme svg").forEach((e) => {
+    toggleShowHide(e);
+  });
+
+  const theme = editors.cm0?.cms.htmlmixed.getOption("theme");
+  let toogle = theme == "default" ? "dracula" : "default";
+
+  for (const cmName in editors) {
+    for (const cm in editors[cmName].cms) {
+      editors[cmName].cms[cm].setOption("theme", toogle);
+    }
+  }
+}
+
+//IFRAME Visualizar
+function toggleWrap() {
+  const lineWrapping = editors.cm0?.cms.htmlmixed.getOption("lineWrapping");
+
+  for (const cmName in editors) {
+    for (const cm in editors[cmName].cms) {
+      editors[cmName].cms[cm].setOption("lineWrapping", !lineWrapping);
+    }
+  }
+
+  document.querySelectorAll(".cp_tab_toggle_wrap svg").forEach((e) => {
+    toggleShowHide(e);
+  });
+}
+
+function toggleShowHide(e) {
+  if (e.classList.contains("cp_show")) {
+    e.classList.remove("cp_show");
+    e.classList.add("cp_hide");
+  } else {
+    e.classList.add("cp_show");
+    e.classList.remove("cp_hide");
+  }
+}
+
+function render(cmName) {
+  const editor = editors[cmName];
+  if (!editor) return;
+
+  const cms = editor.cms;
+  const cp_preview_loading = editor.preview.querySelector(
+    ".cp_preview_loading"
+  );
+  const iframeComponent =
+    editor.preview.querySelector(".cp_preview").contentWindow.document;
+  // const btnSubmit = document.querySelector("#mod_quiz-next-nav");
+  // btnSubmit.setAttribute("disabled", "disabled");
+
+  let cssCode = cms.css.getValue() ?? "";
+  let jsCode = cms.javascript.getValue() ?? "";
+
+  cp_preview_loading.classList.add("show");
+
+  iframeComponent.open();
+  iframeComponent.writeln(`
+              ${cms.htmlmixed.getValue()}
+              <style>${cssCode}</style>
+              <script>${jsCode}</script>`);
+
+  iframeComponent.close();
+
+  cp_preview_loading.classList.remove("show");
+
+  if (mocha) {
+    mocha.run();
+  }
+}
+
+function openTab(e) {
+  e.preventDefault();
+  //deal with tabs tiltes
+  Array.from(e.target.parentNode.querySelectorAll(".cp_tab_btn")).forEach((e) =>
+    e.classList.remove("active")
+  );
+  e.target.classList.add("active");
+
+  //deal with tabs content
+  const tabid = e.target.dataset.tabid;
+  const editor = e.target.parentNode.parentNode;
+  editor.querySelectorAll(".cp_tab").forEach((e) => {
+    e.style.visibility = e.getAttribute("id") == tabid ? "visible" : "hidden";
+  });
+}
+
+//event listeners
+document.querySelectorAll(".cp_tab_toggle_theme").forEach((e) => {
+  e.addEventListener("click", toggleTheme);
+});
+
+document.querySelectorAll(".cp_tab_toggle_wrap").forEach((e) => {
+  e.addEventListener("click", toggleWrap);
+});
+
+document.querySelectorAll(".cp_tab_links .cp_tab_btn").forEach((e) => {
+  e.addEventListener("click", openTab.bind(this));
+});
+
+export const init = () => {
+  render();
+};
