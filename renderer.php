@@ -252,7 +252,7 @@ EOF;
             });
           
             runner.on("fail", function (test, err) {
-              report.fail.push('fail:' + test.fullTitle() + '-- error: ' + err.message);
+              report.fail.push(test.fullTitle() + '-- error: ' + err.message);
             });
           
             runner.on("end", function () {

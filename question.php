@@ -278,9 +278,6 @@ class qtype_codeplayground_question extends question_graded_automatically {
             $css_results["feedback"] = '';
         }
 
-        //sintax fraction (2% per fail)
-        $syntax_score = ($html_results["errors"] + $css_results["errors"]) * 0.02;
-
         //tests
         $test_html_results = "";
         $test_score = "não tem testes";
@@ -296,12 +293,27 @@ class qtype_codeplayground_question extends question_graded_automatically {
             }
         }
 
+        //sintax fraction (2% per fail)
+        $syntax_score = ($html_results["errors"] + $css_results["errors"]) * 0.02;
         $total_score = $total_score -  $syntax_score;
-        $score = "<h6>Test score: $test_score, Syntax score: $syntax_score</h6>";
+
+        if($total_score  < 0) { 
+            $total_score = 0;
+        }
+
+        $syntax_score_per = number_format($syntax_score * 100, 2);
+        $total_score_per = number_format($test_score * 100,2);
         
+        $summary_score = "<h3>Resumo</h3>";
+        if(!empty($answerTestResult)) {
+            $summary_score .= "<p>Total dos testes: <strong>$total_score_per%</strong></p>";
+        }
+        $summary_score .= "<p>Total dos erros de sinxtaxe: <strong>$syntax_score_per%</strong></p>";
 
-
-        $feedback = $score. $test_html_results . $html_results["feedback"] . $css_results["feedback"] . '<p>' . get_string('cp_total_failures', 'qtype_codeplayground') . $fraction*100 .  '</p>';
+        $feedback = $test_html_results 
+            . $html_results["feedback"] 
+            . $css_results["feedback"]
+            . $summary_score;
 
         $this->save_feedback($feedback);
         return array($total_score, question_state::graded_state_for_fraction($total_score));
@@ -320,8 +332,8 @@ class qtype_codeplayground_question extends question_graded_automatically {
             $html .= "<p>$pass</p>";
         }
 
-        $html .= "<p>Pontuação dos testes: <strong>" . $results['score'] . "</strong></p>";
-        $html .= "<p>Total de testes: <strong>" . $results['total'] . "</strong></p>";
+        // $html .= "<p>Pontuação dos testes: <strong>" . $results['score'] . "</strong></p>";
+        // $html .= "<p>Total de testes: <strong>" . $results['total'] . "</strong></p>";
 
         return $html;
     }
