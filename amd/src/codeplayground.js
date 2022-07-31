@@ -34,20 +34,16 @@ document.querySelectorAll(".cp_all").forEach((e, index) => {
     });
 
     cm.setSize("100%", "100%");
-
     codeMirrors.push({ [modeName]: cm });
   });
 
-  editors.push({
-    [cmName]: {
-      cms: Object.assign(...codeMirrors),
-      preview: iframePreview,
-    },
-  });
-});
+  editors[cmName] = {
+    cms: Object.assign(...codeMirrors),
+    preview: iframePreview,
+  };
 
-editors = Object.assign(...editors);
-console.log(editors);
+  render(cmName);
+});
 
 function toggleTheme() {
   //TODO FIX the theme change using localstorage
@@ -122,7 +118,7 @@ function render(cmName) {
 
   cp_preview_loading.classList.remove("show");
 
-  if (mocha) {
+  if (mocha && !document.querySelector('.specificfeedback')) { //TODO Fix this
     mocha.run();
   }
 }
@@ -157,5 +153,5 @@ document.querySelectorAll(".cp_tab_links .cp_tab_btn").forEach((e) => {
 });
 
 export const init = () => {
-  render();
+  console.log("codeplayground init");
 };
