@@ -118,7 +118,7 @@ function render(cmName) {
 
   cp_preview_loading.classList.remove("show");
 
-  if (mocha && !document.querySelector('.specificfeedback')) { //TODO Fix this
+  if (typeof mocha !== 'undefined' && !document.querySelector('.specificfeedback')) { //TODO Fix this
     mocha.run();
   }
 }
