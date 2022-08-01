@@ -27,7 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_codeplayground';
-$plugin->version   = 2020081500;
+$plugin->version   = 2022073100;
 
 $plugin->requires  = 2012062504;
 
